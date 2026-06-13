@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de TMB Atlética</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0F0F13;
+      --surface:   #1C1C24;
+      --border:    #2E2E3C;
+      --accent:    #B8FF57;
+      --accent-dim:#7DB830;
+      --text:      #E8E8F0;
+      --muted:     #7A7A96;
+      --danger:    #FF5757;
+      --warn:      #FFB457;
+      --ok:        #57DFFF;
+      --gain:      #B8FF57;
+      --radius:    12px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .widget {
+      width: 100%;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .widget-header {
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+    }
+    .header-icon {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .header-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 10px;
+      display: block;
+    }
+    .header-text h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .header-text p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Form ── */
+    .form-body { padding: 24px 28px; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    input[type="number"],
+    select {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 10px 13px;
+      width: 100%;
+      transition: border-color 0.15s;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    select { cursor: pointer; }
+    select option { background: #1C1C24; }
+
+    /* sex toggle */
+    .sex-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .sex-toggle input { display: none; }
+    .sex-toggle label {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      padding: 10px 0;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sex-toggle input:checked + label {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .unit-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+      padding-left: 2px;
+    }
+
+    /* btn */
+    .btn-calc {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 10px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-calc:hover { opacity: 0.88; }
+    .btn-calc:active { transform: scale(0.98); }
+
+    /* ── Result panel ── */
+    .result-panel {
+      border-top: 1px solid var(--border);
+      padding: 24px 28px 28px;
+      display: none;
+      animation: fadeUp 0.3s ease;
+    }
+    .result-panel.visible { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* main value */
+    .result-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    .result-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 58px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      color: var(--accent);
+    }
+    .result-unit {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+    .result-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      margin-bottom: 18px;
+    }
+
+    /* metas grid */
+    .metas-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .meta-card {
+      border-radius: 10px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+    .meta-card .mc-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .meta-card .mc-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .meta-card .mc-sub {
+      font-size: 10px;
+      margin-top: 3px;
+      opacity: 0.7;
+    }
+    .mc-deficit  { background: rgba(255,87,87,0.10);  }
+    .mc-deficit  .mc-label, .mc-deficit  .mc-value, .mc-deficit  .mc-sub  { color: var(--danger); }
+    .mc-manut    { background: rgba(184,255,87,0.10); }
+    .mc-manut    .mc-label, .mc-manut    .mc-value, .mc-manut    .mc-sub  { color: var(--accent); }
+    .mc-ganho    { background: rgba(255,180,87,0.10); }
+    .mc-ganho    .mc-label, .mc-ganho    .mc-value, .mc-ganho    .mc-sub  { color: var(--warn); }
+
+    /* compare bar */
+    .compare-wrap { margin-bottom: 18px; }
+    .compare-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .compare-label span {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .compare-track {
+      position: relative;
+      height: 10px;
+      border-radius: 99px;
+      background: var(--border);
+      overflow: visible;
+    }
+    .compare-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent);
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .compare-needle {
+      position: absolute;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border: 2px solid var(--bg);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+    }
+    .compare-hints {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+    }
+    .compare-hints span { font-size: 10px; color: var(--muted); }
+
+    /* note */
+    .tmb-note {
+      background: rgba(184, 255, 87, 0.07);
+      border: 1px solid rgba(184, 255, 87, 0.18);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .tmb-note strong { color: var(--accent); font-weight: 600; }
+
+    /* reset */
+    .btn-reset {
+      width: 100%;
+      margin-top: 16px;
+      padding: 10px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-reset:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* footer */
+    .widget-footer {
+      padding: 14px 28px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="widget">
+
+  <!-- Header -->
+  <div class="widget-header">
+    <div class="header-icon">
+      <img src="Logo.jpg" alt="Logo" />
+    </div>
+    <div class="header-text">
+      <h1>TMB Atlética</h1>
+      <p>Taxa metabólica basal com contexto esportivo</p>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="form-body" id="formSection">
+
+    <div class="field-row">
+      <div class="field full">
+        <label>Sexo biológico</label>
+        <div class="sex-toggle">
+          <input type="radio" name="sexo" id="masculino" value="M" checked />
+          <label for="masculino">♂ Masculino</label>
+          <input type="radio" name="sexo" id="feminino" value="F" />
+          <label for="feminino">♀ Feminino</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Idade (anos)</label>
+        <input type="number" id="idade" placeholder="28" min="10" max="99" />
+      </div>
+      <div class="field">
+        <label>Peso (kg)</label>
+        <input type="number" id="peso" placeholder="80" min="30" max="300" step="0.1" />
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field full">
+        <label>Altura (cm)</label>
+        <input type="number" id="altura" placeholder="175" min="100" max="250" />
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field full">
+        <label>Nível de atividade</label>
+        <select id="atividade">
+          <option value="1.2">Sedentário — sem exercício</option>
+          <option value="1.375">Levemente ativo — 1–3x / semana</option>
+          <option value="1.55" selected>Moderado — 3–5x / semana</option>
+          <option value="1.725">Muito ativo — 6–7x / semana</option>
+          <option value="1.9">Atleta / trabalho físico pesado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field full">
+        <label>Modalidade principal</label>
+        <select id="modalidade">
+          <option value="musculacao">Musculação / Bodybuilding</option>
+          <option value="crossfit">CrossFit / Funcional</option>
+          <option value="corrida">Corrida / Ciclismo / Natação</option>
+          <option value="esporte_coletivo">Esporte coletivo (futebol, vôlei…)</option>
+          <option value="artes_marciais">Artes Marciais / Luta</option>
+          <option value="pilates_yoga">Pilates / Yoga</option>
+          <option value="geral">Atividade geral / Academia</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-calc" onclick="calcular()">Calcular TMB</button>
+  </div>
+
+  <!-- Result -->
+  <div class="result-panel" id="resultPanel">
+
+    <div class="result-label">Taxa Metabólica Basal</div>
+    <div style="display:flex; align-items:baseline; gap:2px; margin-bottom:2px;">
+      <div class="result-value" id="tmbValor">—</div>
+      <span class="result-unit">kcal/dia</span>
+    </div>
+    <div class="result-sub" id="tmbSub">Fórmula Mifflin-St Jeor</div>
+
+    <!-- GET -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+      <div>
+        <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:2px;">Gasto energético total (GET)</div>
+        <div style="display:flex; align-items:baseline; gap:4px;">
+          <span id="getValor" style="font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:800; color:var(--ok);">—</span>
+          <span style="font-size:13px; color:var(--muted);">kcal/dia</span>
+        </div>
+      </div>
+      <div id="fatorBadge" style="font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:4px 10px; border-radius:6px; background:rgba(87,223,255,0.1); color:var(--ok); border:1px solid rgba(87,223,255,0.2);">×1.55</div>
+    </div>
+
+    <!-- Barra GET vs TMB -->
+    <div class="compare-wrap">
+      <div class="compare-label">
+        <span>TMB</span>
+        <span>GET</span>
+      </div>
+      <div class="compare-track">
+        <div class="compare-fill" id="compareFill" style="width:65%"></div>
+        <div class="compare-needle" id="compareNeedle" style="left:65%"></div>
+      </div>
+      <div class="compare-hints">
+        <span id="hintTmb">—</span>
+        <span id="hintGet">—</span>
+      </div>
+    </div>
+
+    <!-- Metas calóricas -->
+    <div class="metas-grid">
+      <div class="meta-card mc-deficit">
+        <div class="mc-label">Déficit</div>
+        <div class="mc-value" id="metaDeficit">—</div>
+        <div class="mc-sub">−500 kcal</div>
+      </div>
+      <div class="meta-card mc-manut">
+        <div class="mc-label">Manutenção</div>
+        <div class="mc-value" id="metaManut">—</div>
+        <div class="mc-sub">= GET</div>
+      </div>
+      <div class="meta-card mc-ganho">
+        <div class="mc-label">Massa</div>
+        <div class="mc-value" id="metaGanho">—</div>
+        <div class="mc-sub">+300 kcal</div>
+      </div>
+    </div>
+
+    <div class="tmb-note" id="tmbNote"></div>
+
+    <button class="btn-reset" onclick="resetar()">↩ Calcular novamente</button>
+  </div>
+
+  <!-- Footer -->
+  <div class="widget-footer">
+    Calculadora informativa · Consulte um nutricionista esportivo
+  </div>
+</div>
+
+<script>
+  const notas = {
+    musculacao: {
+      alto:  'Para musculação e hipertrofia, seu GET indica a base calórica. Para ganho de massa limpo, adicione 200–300 kcal ao GET com foco em proteína (1,8–2,2 g/kg). TMB elevada reflete alta massa muscular — ótimo sinal metabólico.',
+      medio: 'Seu metabolismo está em boa faixa para musculação. Garanta ingestão proteica adequada (1,6–2g/kg) e ajuste as calorias conforme seu objetivo atual.',
+      baixo: 'TMB mais baixa pode indicar oportunidade de aumentar massa muscular, que eleva o metabolismo basal. Foco em treino de força progressivo e alimentação adequada.',
+    },
+    crossfit: {
+      alto:  'CrossFit de alta intensidade eleva consideravelmente o gasto calórico. Seu GET reflete essa demanda — não negligencie carboidratos no peri-treino para manter a performance.',
+      medio: 'Bom nível metabólico para CrossFit. Distribua as calorias em 4–6 refeições para sustentar a intensidade dos treinos e a recuperação.',
+      baixo: 'Considere revisar a intensidade dos treinos ou a frequência semanal. TMB pode aumentar com mais massa muscular adquirida pelo treino funcional.',
+    },
+    corrida: {
+      alto:  'Corredores de volume alto têm gasto energético elevado. Reponha carboidratos estrategicamente e não negligencie proteínas para evitar perda muscular.',
+      medio: 'GET compatível com treino de endurance moderado. Em dias de treino longo, aumente a ingestão calórica em 300–500 kcal.',
+      baixo: 'TMB baixa em corredores pode indicar restrição calórica crônica. RED-S (deficiência energética relativa) é comum — avalie com nutricionista esportivo.',
+    },
+    esporte_coletivo: {
+      alto:  'Esportes coletivos de alta demanda justificam GET elevado. Periodize a nutrição conforme dias de jogo vs. treino vs. descanso.',
+      medio: 'Metabolismo adequado para esporte coletivo. Hidratação e eletrólitos são tão importantes quanto as calorias totais.',
+      baixo: 'Avalie se o volume de treino está condizente com a posição/função. Aumento de massa muscular pode elevar a TMB e melhorar a performance.',
+    },
+    artes_marciais: {
+      alto:  'Em artes marciais com categorias de peso, controle calórico é crítico. Use o GET como referência para não comprometer força e agilidade na cutting phase.',
+      medio: 'Bom equilíbrio metabólico para artes marciais. Mantenha ingestão proteica elevada (1,8–2g/kg) para preservar massa em fases de cutting.',
+      baixo: 'TMB mais conservadora — vantagem para controle de peso em categorias. Foco em qualidade alimentar e timing de nutrientes.',
+    },
+    pilates_yoga: {
+      alto:  'Mesmo com modalidades de menor intensidade, TMB elevada indica bom condicionamento metabólico. Mantenha alimentação balanceada e bem distribuída.',
+      medio: 'GET compatível com Pilates/Yoga regular. Proteína adequada (1,2–1,6g/kg) apoia a recuperação muscular e mobilidade.',
+      baixo: 'Considere complementar com treino de força leve para elevar a massa muscular e o metabolismo basal ao longo do tempo.',
+    },
+    geral: {
+      alto:  'Seu metabolismo está ativo e requer boa ingestão calórica. Use o GET como guia e ajuste conforme seu objetivo com apoio de um nutricionista.',
+      medio: 'TMB e GET em faixa saudável. Distribua as calorias em refeições equilibradas e ajuste conforme evolução do treino.',
+      baixo: 'TMB mais baixa é comum em pessoas com menos massa muscular. Treino de força progressivo é a forma mais eficaz de elevar o metabolismo a longo prazo.',
+    },
+  };
+
+  function getNotaTipo(tmb) {
+    if (tmb >= 1800) return 'alto';
+    if (tmb >= 1400) return 'medio';
+    return 'baixo';
+  }
+
+  function calcular() {
+    const sexo     = document.querySelector('input[name="sexo"]:checked').value;
+    const idade    = parseFloat(document.getElementById('idade').value);
+    const peso     = parseFloat(document.getElementById('peso').value);
+    const alturaCm = parseFloat(document.getElementById('altura').value);
+    const fator    = parseFloat(document.getElementById('atividade').value);
+    const modal    = document.getElementById('modalidade').value;
+
+    if (!idade || !peso || !alturaCm || idade < 10 || peso < 30 || alturaCm < 100) {
+      alert('Por favor, preencha todos os campos corretamente.');
+      return;
+    }
+
+    let tmb;
+    if (sexo === 'M') {
+      tmb = (10 * peso) + (6.25 * alturaCm) - (5 * idade) + 5;
+    } else {
+      tmb = (10 * peso) + (6.25 * alturaCm) - (5 * idade) - 161;
+    }
+
+    const get = Math.round(tmb * fator);
+    tmb = Math.round(tmb);
+
+    const tipo = getNotaTipo(tmb);
+    const nota = notas[modal] ? notas[modal][tipo] : notas.geral[tipo];
+
+    const pct = Math.min(Math.max((tmb / get) * 100, 30), 85);
+
+    document.getElementById('tmbValor').textContent = tmb.toLocaleString('pt-BR');
+    document.getElementById('tmbSub').textContent = 'Mifflin-St Jeor · ' + (sexo === 'M' ? 'Masculino' : 'Feminino') + ' · ' + idade + ' anos';
+    document.getElementById('getValor').textContent = get.toLocaleString('pt-BR');
+    document.getElementById('fatorBadge').textContent = '×' + fator;
+
+    document.getElementById('compareFill').style.width = pct + '%';
+    setTimeout(() => {
+      document.getElementById('compareNeedle').style.left = pct + '%';
+    }, 50);
+
+    document.getElementById('hintTmb').textContent = tmb.toLocaleString('pt-BR') + ' kcal';
+    document.getElementById('hintGet').textContent = get.toLocaleString('pt-BR') + ' kcal';
+
+    document.getElementById('metaDeficit').textContent = Math.round(get - 500).toLocaleString('pt-BR');
+    document.getElementById('metaManut').textContent   = get.toLocaleString('pt-BR');
+    document.getElementById('metaGanho').textContent   = Math.round(get + 300).toLocaleString('pt-BR');
+
+    document.getElementById('tmbNote').innerHTML = '<strong>⚡ Contexto atlético:</strong> ' + nota;
+
+    document.getElementById('formSection').style.display = 'none';
+    const panel = document.getElementById('resultPanel');
+    panel.classList.add('visible');
+  }
+
+  function resetar() {
+    document.getElementById('formSection').style.display = 'block';
+    document.getElementById('resultPanel').classList.remove('visible');
+    document.getElementById('compareNeedle').style.left = '65%';
+    document.getElementById('compareFill').style.width = '65%';
+  }
+</script>
+</body>
+</html>
