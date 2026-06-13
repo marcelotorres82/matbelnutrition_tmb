@@ -346,6 +346,19 @@
       font-size: 11px;
       color: var(--muted);
       text-align: center;
+      line-height: 1.5;
+    }
+    .widget-footer a {
+      color: inherit;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .widget-footer a:hover {
+      color: var(--accent);
+    }
+    .widget-footer .brand-name {
+      color: var(--accent);
+      font-weight: 700;
     }
   </style>
 </head>
@@ -492,14 +505,15 @@
 
   <!-- Footer -->
   <div class="widget-footer">
-    Calculadora informativa · Consulte um nutricionista esportivo
+    Todos os direitos reservados a <a class="brand-name" href="https://matbelnutrition.com.br/" target="_blank" rel="noopener noreferrer">Matbel Nutrition</a><br />
+    Desenvolvido por <a href="https://github.com/marcelotorres82" target="_blank" rel="noopener noreferrer">Marcelo Torres</a>
   </div>
 </div>
 
 <script>
   const notas = {
     musculacao: {
-      alto:  'Para musculação e hipertrofia, seu GET indica a base calórica. Para ganho de massa limpo, adicione 200–300 kcal ao GET com foco em proteína (1,8–2,2 g/kg). TMB elevada reflete alta massa muscular — ótimo sinal metabólico.',
+      alto:  'Para musculação e hipertrofia, seu GET indica a base calórica. Para ganho de massa magra, adicione 200–300 kcal ao GET com foco em proteína (1,8–2,2 g/kg). TMB elevada reflete alta massa muscular — ótimo sinal metabólico.',
       medio: 'Seu metabolismo está em boa faixa para musculação. Garanta ingestão proteica adequada (1,6–2g/kg) e ajuste as calorias conforme seu objetivo atual.',
       baixo: 'TMB mais baixa pode indicar oportunidade de aumentar massa muscular, que eleva o metabolismo basal. Foco em treino de força progressivo e alimentação adequada.',
     },
